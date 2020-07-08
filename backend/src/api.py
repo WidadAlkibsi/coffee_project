@@ -22,16 +22,14 @@ db_drop_and_create_all()
 '''
 @TODO implement endpoint
     GET /drinks
-        it should be a public endpoint
+        it should be a public endpoint (Doest require auth)
         it should contain only the drink.short() data representation
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks', methods=['GET'])
-@requires_auth('get:drinks') # make sure same name in AUth0
 def drinks_get():
     alldrinks =  Drink.query.all()
- 
     return jsonify({
         'success': True,
         'drinks':[drink.short() for drink in alldrinks] 
@@ -81,7 +79,7 @@ def create_new_drinks(payload):
         created_drink = Drink(title=title, recipe=json.dumps(recipe))
         created_drink.insert()
     except Exception:
-        abort(400)
+        abort(401)
 
     return jsonify({'success': True, 
     'drinks': [created_drink.long()
@@ -120,7 +118,7 @@ def patch_drinks(payload, id):
 
         drink.update()
     except Exception:
-        abort(400)
+        abort(401)
         
 
     return jsonify({'success': True, 'drinks': [drink.long()]}),200
@@ -215,14 +213,6 @@ def unauthorized(error):
         "message": 'Not Authorized'
     }), 401
 
-@app.errorhandler(404)
-def not_found(error):
-    return jsonify({
-        "success": False,
-        "error": 404,
-        "message": "Resource Not Found"
-    }), 404
-
 @app.errorhandler(405)
 def not_allowed(error):
     return jsonify({'success': False,
@@ -238,5 +228,9 @@ def server_error(error):
                     'message': 'Internal Server Error'
                     }), 500
 
-
-
+@app.errorhandler(AuthError)
+def auth_error(AuthError):
+    return jsonify({ 'success': False,
+    'error': 401,
+    'message': 'Authorization Error'
+    }), 401

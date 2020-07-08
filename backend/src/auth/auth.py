@@ -8,7 +8,7 @@ import sys
 
 AUTH0_DOMAIN = 'dev-xoxwidad.us.auth0.com' 
 ALGORITHMS = ['RS256']
-API_AUDIENCE = 'coffee'
+API_AUDIENCE = 'https://coffee-project/'
 
 ## AuthError Exception
 '''
@@ -85,6 +85,7 @@ def check_permissions(permission, payload):
             'description': 'Permission not found.'
         }, 403)
          #  raise Exception('Not Implemented')
+
     return True
 
 '''
@@ -162,30 +163,6 @@ def verify_decode_jwt(token):
                 'description': 'Unable to find the appropriate key.'
             }, 400)
 
-'''
-@TODO implement @requires_auth(permission) decorator method
-    @INPUTS
-        permission: string permission (i.e. 'post:drink')
-
-    it should use the get_token_auth_header method to get the token
-    it should use the verify_decode_jwt method to decode the jwt
-    it should use the check_permissions method validate claims and check the requested permission
-    return the decorator which passes the decoded payload to the decorated method
-'''
-def check_permissions(permission, payload):
-    if 'permissions' not in payload:
-                        raise AuthError({
-                            'code': 'invalid_claims',
-                            'description': 'Permissions not included in JWT.'
-                        }, 400)
-
-    if permission not in payload['permissions']:
-        raise AuthError({
-            'code': 'unauthorized',
-            'description': 'Permission not found.'
-        }, 403)
-    return True
-    
 def requires_auth(permission=''):
     def requires_auth_decorator(f):
         @wraps(f)
